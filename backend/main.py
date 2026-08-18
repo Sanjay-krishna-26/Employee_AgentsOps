@@ -1635,6 +1635,43 @@ def save_application(req: Dict[str, Any]):
     save_database()
     return {"success": True, "application": next((a for a in db_state["applications"] if a["employeeId"] == emp_id), None)}
 
+# PUT submitted-docs checklist update
+@app.put("/api/applications/{employee_id}/submitted-docs")
+def update_submitted_docs(employee_id: str, req: Dict[str, Any]):
+    submitted_docs = req.get("submittedDocs", [])
+    now_iso = datetime.utcnow().isoformat() + "Z"
+    
+    app_obj = next((a for a in db_state.get("applications", []) if a.get("employeeId") == employee_id), None)
+    if app_obj:
+        app_obj["submittedDocs"] = submitted_docs
+        app_obj["updatedAt"] = now_iso
+    else:
+        app_obj = {
+            "employeeId": employee_id,
+            "status": "draft",
+            "submittedDocs": submitted_docs,
+            "updatedAt": now_iso
+        }
+        db_state.setdefault("applications", []).append(app_obj)
+
+    doc_text_map = {
+        "resume": "Resume Uploaded",
+        "aadhaar": "Aadhaar Uploaded",
+        "pan": "PAN Uploaded",
+        "photo": "Passport Photo Uploaded",
+        "educational": "Educational Certificates Uploaded"
+    }
+    
+    for item in db_state.get("checklists", []):
+        if item.get("employeeId") == employee_id and item.get("category") == "documents":
+            for doc_key, doc_label in doc_text_map.items():
+                if doc_label.lower() in item.get("text", "").lower():
+                    item["isCompleted"] = (doc_key in submitted_docs)
+                    item["updatedAt"] = now_iso
+
+    save_database(["applications", "checklists"])
+    return {"success": True, "submittedDocs": submitted_docs}
+
 # Documents
 @app.get("/api/documents/{employee_id}")
 def get_employee_documents(employee_id: str):

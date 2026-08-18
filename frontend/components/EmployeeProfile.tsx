@@ -187,18 +187,29 @@ export default function EmployeeProfile({
     }
   }
 
+  const [localSubmittedDocs, setLocalSubmittedDocs] = useState<string[]>(() => application?.submittedDocs || []);
+
+  useEffect(() => {
+    if (application?.submittedDocs) {
+      setLocalSubmittedDocs(application.submittedDocs);
+    }
+  }, [application?.submittedDocs]);
+
   // Handle toggling of document checklist items
   async function handleToggleDoc(docId: string, isChecked: boolean) {
     setErrorStatus("");
     setSuccessStatus("");
 
-    const currentSubmittedDocs = application?.submittedDocs || [];
+    const currentSubmittedDocs = localSubmittedDocs;
     let newSubmittedDocs: string[];
     if (isChecked) {
-      newSubmittedDocs = [...currentSubmittedDocs, docId];
+      newSubmittedDocs = Array.from(new Set([...currentSubmittedDocs, docId]));
     } else {
       newSubmittedDocs = currentSubmittedDocs.filter(id => id !== docId);
     }
+
+    // Immediate optimistic state update
+    setLocalSubmittedDocs(newSubmittedDocs);
 
     const token = localStorage.getItem("agentops_jwt");
     const headers: Record<string, string> = {
@@ -209,26 +220,10 @@ export default function EmployeeProfile({
     }
 
     try {
-      const appRes = await fetch("/api/applications", {
-        method: "POST",
+      const appRes = await fetch(`/api/applications/${currentUser.id}/submitted-docs`, {
+        method: "PUT",
         headers,
-        body: JSON.stringify({
-          employeeId: currentUser.id,
-          fullName: application?.fullName || currentUser.name,
-          email: application?.email || currentUser.email,
-          mobile: application?.mobile || currentUser.mobile,
-          gender: application?.gender || editGender,
-          highestQualification: application?.highestQualification || editQualification,
-          collegeName: application?.collegeName || editCollege,
-          yearOfPassing: application?.yearOfPassing || editYearOfPassing,
-          percentageOrCgpa: application?.percentageOrCgpa || editCgpa,
-          technicalSkills: application?.technicalSkills || [],
-          otherSkills: application?.otherSkills || [],
-          status: application?.status || "draft",
-          googleDriveLink: application?.googleDriveLink || "",
-          submittedDocs: newSubmittedDocs,
-          updatedAt: new Date().toISOString()
-        })
+        body: JSON.stringify({ submittedDocs: newSubmittedDocs })
       });
 
       if (!appRes.ok) {
@@ -237,7 +232,7 @@ export default function EmployeeProfile({
 
       onRefreshAll();
     } catch (e: any) {
-      setErrorStatus(e?.message || "Failed to update checklist.");
+      console.error("Failed to update submitted docs:", e);
     }
   }
 
@@ -250,7 +245,7 @@ export default function EmployeeProfile({
     { id: "experience", label: "Previous Employment Proof Letters (Optional)" }
   ];
 
-  const submittedDocsList = application?.submittedDocs || [];
+  const submittedDocsList = localSubmittedDocs;
   const checkedCount = submittedDocsList.length;
   const progressPercent = Math.round((checkedCount / documentTypes.length) * 100);
 
