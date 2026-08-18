@@ -1384,15 +1384,15 @@ def create_employee(req: Dict[str, Any]):
         pwd = req.get("password")
         dob = req.get("dob")
         
-        if not name or not email or not mobile:
-            raise HTTPException(status_code=400, detail="Employee Name, Email, and Mobile are required.")
+        if not name or not email or not mobile or not pwd or not pwd.strip():
+            raise HTTPException(status_code=400, detail="Employee Name, Email, Mobile, and Password are all required.")
             
         exists = any(u.get("email", "").lower() == email.lower() for u in db_state["users"])
         if exists:
             raise HTTPException(status_code=400, detail="Email already registered in system.")
             
         new_id = f"emp-{int(datetime.now().timestamp() * 1000)}"
-        auto_pwd = pwd if (pwd and pwd.strip()) else f"AO@{random.randint(1000, 9999)}"
+        assigned_pwd = pwd.strip()
         
         new_user = {
             "id": new_id,
@@ -1407,7 +1407,7 @@ def create_employee(req: Dict[str, Any]):
             new_user["dob"] = dob
             
         db_state["users"].append(new_user)
-        db_state["passwords"][new_id] = auto_pwd
+        db_state["passwords"][new_id] = assigned_pwd
         
         # Empty application seed
         new_app = {

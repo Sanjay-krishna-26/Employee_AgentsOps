@@ -164,8 +164,8 @@ export default function AdminEmployeeManagement({
   async function handleCreateUser(e: React.FormEvent) {
     e.preventDefault();
     setActionError("");
-    if (!newName || !newEmail || !newMobile) {
-      setActionError("All configuration parameters are required.");
+    if (!newName || !newEmail || !newMobile || !newPassword.trim()) {
+      setActionError("All fields including Password are required.");
       return;
     }
 
@@ -370,7 +370,7 @@ export default function AdminEmployeeManagement({
           className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-md hover:shadow-indigo-500/20 hover:scale-[1.02] transition-all cursor-pointer"
         >
           <UserPlus className="h-4 w-4" />
-          Provision Employee
+          Add New Employee
         </button>
       </div>
 
@@ -904,13 +904,16 @@ export default function AdminEmployeeManagement({
                     />
                   </div>
                   <div>
-                    <label className="text-slate-400 block mb-1">Assign Login Password (Optional)</label>
+                    <label className="text-slate-400 block mb-1 font-semibold flex items-center gap-1">
+                      Assign Login Password <span className="text-rose-500">*</span>
+                    </label>
                     <input
-                      type="text"
-                      placeholder="Leave blank to generate automatically"
+                      type="password"
+                      required
+                      placeholder="Enter employee password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-slate-200 focus:outline-none"
+                      className="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-slate-200 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                   <button
