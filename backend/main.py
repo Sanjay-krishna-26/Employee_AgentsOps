@@ -1108,9 +1108,6 @@ def auth_login(req: LoginRequest):
         db_state["passwords"][matched_user["id"]] = password
         save_database("passwords")
         
-    if matched_user.get("role") == "employee":
-        ensure_default_test_assigned(matched_user["id"])
-        
     log_activity(matched_user["id"], matched_user["name"], "User Sign-In", "Successful authentication via credentials.")
     
     return {
@@ -1419,11 +1416,8 @@ def create_employee(req: Dict[str, Any]):
         send_simulated_email(email, "Welcome to AgentOps Labs - Temporary Account Password", mail_txt, "welcome", sync=False)
         send_system_notification(new_id, "Onboarding Setup Launched", "Welcome! Please enter your dashboard, fill your Onboarding application description, and upload credentials.", "info", sync=False)
         
-        # Auto-assign the default onboarding test upon account creation
-        ensure_default_test_assigned(new_id, sync=False)
-        
         # Sync only the collections that actually changed (faster Firestore write)
-        save_database(["users", "passwords", "applications", "checklists", "activityLogs", "emails", "notifications", "assignedTests"])
+        save_database(["users", "passwords", "applications", "checklists", "activityLogs", "emails", "notifications"])
         return {"user": new_user, "password": auto_pwd}
 
 # Admin PUT update employee

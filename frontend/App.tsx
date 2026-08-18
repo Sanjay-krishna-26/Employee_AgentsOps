@@ -41,10 +41,10 @@ import {
 } from "./types";
 
 export default function App() {
-  // Authentication state - Default to null so Login page is presented on application start
-  const [authToken, setAuthToken] = useState<string | null>(null);
+  // Authentication state - Persist active session token from localStorage to prevent auto-logout on refresh
+  const [authToken, setAuthToken] = useState<string | null>(() => localStorage.getItem("agentops_jwt"));
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [checkingAuth, setCheckingAuth] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState<boolean>(() => !!localStorage.getItem("agentops_jwt"));
   const [authError, setAuthError] = useState<string | null>(null);
 
   // Secure Password Reset state parsed from email link redirection

@@ -11,32 +11,9 @@
     }
   ],
   "passwords": {
-    "admin-1": "Gvenkat@123",
-    "emp-1781264493152": "Shriya@123",
-    "emp-1781676175369": "Password@123",
-    "emp-1781677214465": "Bharath@123",
-    "emp-1781679186490": "Shriya@21",
-    "emp-1781685362464": "Shriya@08",
-    "emp-1781688625438": "shriya@789",
-    "emp-1781691543246": "gopi@123",
-    "emp-1781699299532": "King@123"
+    "admin-1": "Gvenkat@123"
   },
-  "applications": [
-    {
-      "employeeId": "emp-1787029050478",
-      "fullName": "Bharath Kumar",
-      "email": "bharath.fresh@example.com",
-      "mobile": "+91 9876543210",
-      "gender": "",
-      "highestQualification": "",
-      "collegeName": "",
-      "yearOfPassing": "",
-      "technicalSkills": [],
-      "otherSkills": [],
-      "status": "not_started",
-      "updatedAt": "2026-08-18T04:57:30.478736Z"
-    }
-  ],
+  "applications": [],
   "documents": [],
   "tests": [],
   "assignedTests": [],
@@ -2573,18 +2550,7 @@
   "messages": [],
   "tasks": [],
   "taskSubmissions": [],
-  "attendance": [
-    {
-      "id": "att-1781680495758-35627",
-      "employeeId": "emp-1781679186490",
-      "employeeName": "shriya",
-      "date": "2026-06-17",
-      "status": "approved",
-      "submittedAt": "2026-06-17T07:14:55.758575Z",
-      "remarks": "",
-      "approvedAt": "2026-06-17T07:17:29.923703Z"
-    }
-  ],
+  "attendance": [],
   "leaves": [],
   "settings": {
     "defaultTestId": "test-1781256865335"

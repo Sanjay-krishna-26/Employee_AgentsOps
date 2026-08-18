@@ -43,7 +43,7 @@ export default function EmployeeDashboard({
   const adminTheme = useTheme();
 
   const appStatus = application ? application.status : ApplicationStatus.NOT_STARTED;
-  const isEligibleForTest = appStatus === ApplicationStatus.SUBMITTED || appStatus === ApplicationStatus.APPROVED;
+  const isEligibleForTest = !!application && (appStatus === ApplicationStatus.SUBMITTED || appStatus === ApplicationStatus.APPROVED);
 
   // Pop-up states for default test assignment notification
   const [showAssignedPopup, setShowAssignedPopup] = useState(false);
