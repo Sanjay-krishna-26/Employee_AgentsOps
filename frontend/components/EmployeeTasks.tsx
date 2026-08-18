@@ -44,6 +44,7 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
 
   // Submission Form States
   const [submittedText, setSubmittedText] = useState("");
+  const [submittedDriveLink, setSubmittedDriveLink] = useState("");
   const [attachments, setAttachments] = useState<{ name: string; size: string; url: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -115,8 +116,16 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
     setSubmitError("");
     setSubmitSuccess("");
 
-    if (!submittedText.trim() && attachments.length === 0) {
-      setSubmitError("Please provide either solution text or upload a solution file attachment.");
+    const finalFiles = submittedDriveLink.trim()
+      ? [{
+          name: submittedDriveLink.trim().startsWith("http") ? "Google Drive Deliverable File" : submittedDriveLink.trim(),
+          url: submittedDriveLink.trim(),
+          size: "Drive File"
+        }]
+      : attachments;
+
+    if (!submittedText.trim() && finalFiles.length === 0) {
+      setSubmitError("Please provide solution notes or your uploaded Google Drive file link.");
       return;
     }
 
@@ -126,7 +135,7 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
       employeeId: currentUser.id,
       employeeName: currentUser.name,
       submittedText: submittedText.trim(),
-      files: attachments
+      files: finalFiles
     };
 
     try {
@@ -139,6 +148,7 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
       if (res.ok) {
         setSubmitSuccess("Solution successfully submitted to Administration!");
         setSubmittedText("");
+        setSubmittedDriveLink("");
         setAttachments([]);
         setTimeout(() => {
           setActiveSubmitTask(null);
@@ -287,6 +297,7 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
                             <button
                               onClick={() => {
                                 setSubmittedText(sub?.submittedText || "");
+                                setSubmittedDriveLink(sub?.files?.[0]?.url || "");
                                 setAttachments([]);
                                 setActiveSubmitTask(task);
                                 setSubmitError("");
@@ -414,48 +425,19 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
                   />
                 </div>
 
-                {/* File deliverables */}
+                {/* Uploaded Google Drive File Field */}
                 <div>
-                  <label className="text-slate-700 font-bold block mb-1">Submit Files / Deliverables</label>
-                  <div className="flex items-center justify-center w-full">
-                    <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-300 border-dashed rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100/70 transition-all">
-                      <div className="flex flex-col items-center justify-center pt-4 pb-4">
-                        <Plus className="w-6 h-6 text-slate-400 mb-1" />
-                        <p className="text-[10px] text-slate-500 font-bold">Attach screenshots, zip, docs, CSV, PDF...</p>
-                        <p className="text-[8px] text-slate-400 mt-0.5">Supports any file type</p>
-                      </div>
-                      <input
-                        type="file"
-                        multiple
-                        className="hidden"
-                        onChange={handleFileChange}
-                      />
-                    </label>
-                  </div>
-
-                  {attachments.length > 0 && (
-                    <div className="mt-3 space-y-2">
-                      <p className="font-bold text-slate-700">Files to be Uploaded:</p>
-                      <div className="divide-y divide-slate-150 border border-slate-200 rounded-lg overflow-hidden bg-white">
-                        {attachments.map((file, idx) => (
-                          <div key={idx} className="p-2.5 flex items-center justify-between hover:bg-slate-50">
-                            <div className="flex items-center gap-2 truncate">
-                              <FileText className="h-4 w-4 text-indigo-550 flex-shrink-0" />
-                              <span className="font-semibold text-slate-800 truncate text-xs">{file.name}</span>
-                              <span className="text-[9px] text-slate-450 font-mono">({file.size})</span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => removeAttachment(idx)}
-                              className="text-rose-500 hover:text-rose-700 p-1 rounded hover:bg-rose-50 cursor-pointer"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <label className="text-slate-700 font-bold block mb-1">Uploaded Deliverable File Link / File Name</label>
+                  <input
+                    type="text"
+                    placeholder="Paste uploaded Google Drive file link or file name (e.g. https://drive.google.com/file/d/...)"
+                    value={submittedDriveLink}
+                    onChange={(e) => setSubmittedDriveLink(e.target.value)}
+                    className="w-full bg-white border border-slate-300 rounded p-2.5 text-slate-800 focus:outline-none focus:border-indigo-500 text-xs font-mono"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">
+                    Open the Task Google Drive Folder above, upload your deliverable file, and paste your file link or name here.
+                  </p>
                 </div>
 
                 <div className="flex gap-2.5 pt-2">

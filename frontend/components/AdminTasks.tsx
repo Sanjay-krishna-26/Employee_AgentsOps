@@ -192,6 +192,11 @@ export default function AdminTasks({ employees, onRefreshAll }: AdminTasksProps)
   };
 
   const handleDownload = (fileName: string, url: string) => {
+    if (!url) return;
+    if (url.startsWith("http")) {
+      window.open(url, "_blank");
+      return;
+    }
     try {
       const link = document.createElement("a");
       link.href = url;
