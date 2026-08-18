@@ -55,7 +55,7 @@ export default function AdminTests({
       {
         id: `q-${Date.now()}-1`,
         text: "",
-        type: QuestionType.SINGLE_CHOICE,
+        type: "" as any,
         options: ["", "", "", ""],
         correctAnswers: [0],
         moduleName: "General"
@@ -110,7 +110,7 @@ export default function AdminTests({
     const newQ: Question = {
       id: newQId,
       text: "",
-      type: QuestionType.SINGLE_CHOICE,
+      type: "" as any,
       options: ["", "", "", ""],
       correctAnswers: [0],
       moduleName: "General"
@@ -142,8 +142,7 @@ export default function AdminTests({
   function handleUpdateQuestionType(qId: string, val: QuestionType) {
     setQuestions(questions.map(q => {
       if (q.id === qId) {
-        // Fallback options
-        const opts = val === QuestionType.TRUE_FALSE ? ["True", "False"] : ["Option 1", "Option 2", "Option 3", "Option 4"];
+        const opts = val === QuestionType.TRUE_FALSE ? ["True", "False"] : (q.options && q.options.length >= 2 ? q.options : ["", "", "", ""]);
         return {
           ...q,
           type: val,
@@ -439,11 +438,7 @@ export default function AdminTests({
                                 <label className="text-slate-700 font-bold block mb-1">Input Format Type</label>
                                 <select
                                   value={activeQ.type || ""}
-                                  onChange={(e) => {
-                                    if (e.target.value) {
-                                      handleUpdateQuestionType(activeQ.id, e.target.value as QuestionType);
-                                    }
-                                  }}
+                                  onChange={(e) => handleUpdateQuestionType(activeQ.id, e.target.value as QuestionType)}
                                   className="w-full bg-white border border-slate-300 rounded p-2.5 text-slate-800 focus:outline-none focus:ring-0 cursor-pointer"
                                 >
                                   <option value="">Select</option>
