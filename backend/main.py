@@ -1455,13 +1455,13 @@ def create_employee(req: Dict[str, Any]):
             
         log_activity("admin-1", "Admin Olivia Vance", "Account Provisioned", f"Created employee account: {name} ({email})", sync=False)
         
-        mail_txt = generate_email_body("welcome", {"name": name, "email": email, "password": auto_pwd})
+        mail_txt = generate_email_body("welcome", {"name": name, "email": email, "password": assigned_pwd})
         send_simulated_email(email, "Welcome to AgentOps Labs - Temporary Account Password", mail_txt, "welcome", sync=False)
         send_system_notification(new_id, "Onboarding Setup Launched", "Welcome! Please enter your dashboard, fill your Onboarding application description, and upload credentials.", "info", sync=False)
         
         # Sync only the collections that actually changed (faster Firestore write)
         save_database(["users", "passwords", "applications", "checklists", "activityLogs", "emails", "notifications"])
-        return {"user": new_user, "password": auto_pwd}
+        return {"user": new_user, "password": assigned_pwd}
 
 # Admin PUT update employee
 @app.put("/api/users/{user_id}")

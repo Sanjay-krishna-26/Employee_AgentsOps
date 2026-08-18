@@ -197,8 +197,8 @@ export default function AdminEmployeeManagement({
       onRefreshAll();
       // Also retry after 2 seconds to handle any Firestore propagation delay
       setTimeout(() => onRefreshAll(), 2000);
-    } catch (e) {
-      setActionError("Internal SMTP client dispatch failed.");
+    } catch (e: any) {
+      setActionError(e?.message || "Failed to dispatch employee creation request.");
     }
   }
 

@@ -109,6 +109,22 @@
   ],
   "activityLogs": [
     {
+      "id": "log-1787037470351-74435",
+      "employeeId": "admin-1",
+      "employeeName": "Admin",
+      "action": "Employee Profile Deleted",
+      "details": "Deregistered account and removed index metadata for: emp-1787037462911",
+      "timestamp": "2026-08-18T07:17:50.351089Z"
+    },
+    {
+      "id": "log-1787037462912-52502",
+      "employeeId": "admin-1",
+      "employeeName": "Admin Olivia Vance",
+      "action": "Account Provisioned",
+      "details": "Created employee account: Test Sanjay (testsanjay999@gmail.com)",
+      "timestamp": "2026-08-18T07:17:42.913059Z"
+    },
+    {
       "id": "log-1787032424036-75950",
       "employeeId": "admin-1",
       "employeeName": "G Venkat (HR Lead)",
@@ -1742,6 +1758,14 @@
     }
   ],
   "emails": [
+    {
+      "id": "email-1787037462913-2885",
+      "to": "testsanjay999@gmail.com",
+      "subject": "Welcome to AgentOps Labs - Temporary Account Password",
+      "body": "Welcome Test Sanjay! Your AgentOps Labs onboarding portal account has been created.\n\nLogin credentials:\nEmail: testsanjay999@gmail.com\nPassword: MyPassword123\n\nPlease update your password on your first login.",
+      "sentAt": "2026-08-18T07:17:42.913860Z",
+      "type": "welcome"
+    },
     {
       "id": "email-1787029050480-1715",
       "to": "bharath.fresh@example.com",
