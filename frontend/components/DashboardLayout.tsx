@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   useTheme 
 } from "./ThemeContext";
@@ -60,6 +60,23 @@ export default function DashboardLayout({
   const [notifications, setNotifications] = useState<SystemNotification[]>([]);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  // Close notification dropdown when clicking anywhere outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setShowNotifDropdown(false);
+      }
+    }
+    if (showNotifDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showNotifDropdown]);
 
   // Poll notifications
   async function fetchNotifications() {
@@ -321,9 +338,9 @@ export default function DashboardLayout({
 
           <div className="flex items-center gap-3 relative">
             {/* Notifications Bell */}
-            <div className="relative">
+            <div ref={notifRef} className="relative">
               <button
-                onClick={() => setShowNotifDropdown(!showNotifDropdown)}
+                onClick={() => setShowNotifDropdown(prev => !prev)}
                 className="p-2 rounded-full text-slate-350 hover:text-white hover:bg-white/10 transition-colors cursor-pointer relative"
                 title="Notifications"
               >
