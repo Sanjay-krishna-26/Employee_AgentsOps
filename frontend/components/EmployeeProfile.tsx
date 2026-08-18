@@ -188,11 +188,18 @@ export default function EmployeeProfile({
   }
 
   const [localSubmittedDocs, setLocalSubmittedDocs] = useState<string[]>(() => application?.submittedDocs || []);
-  const isTogglingRef = React.useRef(false);
+  const lastUserActionTimeRef = React.useRef<number>(0);
 
+  // Sync with server application data only if user hasn't toggled recently (in last 5 seconds)
   useEffect(() => {
-    if (!isTogglingRef.current && application?.submittedDocs) {
-      setLocalSubmittedDocs(application.submittedDocs);
+    const timeSinceLastAction = Date.now() - lastUserActionTimeRef.current;
+    if (timeSinceLastAction > 5000 && Array.isArray(application?.submittedDocs)) {
+      const serverDocs = application.submittedDocs;
+      const serverSorted = [...serverDocs].sort().join(",");
+      const localSorted = [...localSubmittedDocs].sort().join(",");
+      if (serverSorted !== localSorted) {
+        setLocalSubmittedDocs(serverDocs);
+      }
     }
   }, [application?.submittedDocs]);
 
@@ -200,7 +207,7 @@ export default function EmployeeProfile({
   async function handleToggleDoc(docId: string, isChecked: boolean) {
     setErrorStatus("");
     setSuccessStatus("");
-    isTogglingRef.current = true;
+    lastUserActionTimeRef.current = Date.now();
 
     const currentSubmittedDocs = localSubmittedDocs;
     let newSubmittedDocs: string[];
@@ -236,10 +243,6 @@ export default function EmployeeProfile({
       }
     } catch (e: any) {
       console.error("Failed to update submitted docs:", e);
-    } finally {
-      setTimeout(() => {
-        isTogglingRef.current = false;
-      }, 1500);
     }
   }
 
