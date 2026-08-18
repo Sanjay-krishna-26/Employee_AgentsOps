@@ -142,6 +142,11 @@ function startPythonFastAPI() {
 const app = express();
 
 app.use("/api", (req, res) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+
   const targetPath = `/api${req.url}`;
   
   // Clean request headers to target local FastAPI server
@@ -156,7 +161,13 @@ app.use("/api", (req, res) => {
     headers: headers
   }, (proxyRes) => {
     // Write headers and statuses directly to response
-    res.writeHead(proxyRes.statusCode || 200, proxyRes.headers);
+    const combinedHeaders = {
+      ...proxyRes.headers,
+      "cache-control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+      "pragma": "no-cache",
+      "expires": "0"
+    };
+    res.writeHead(proxyRes.statusCode || 200, combinedHeaders);
     proxyRes.pipe(res);
   });
 

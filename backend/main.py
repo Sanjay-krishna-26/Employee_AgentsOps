@@ -620,12 +620,37 @@ async def db_reload_middleware(request: Request, call_next):
     finally:
         _request_db_context.reset(token)
     
-    if request.method == "GET" and response.status_code == 200:
-        if "/api/" in str(request.url):
-            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-        response.headers["Access-Control-Allow-Origin"] = "*"
+    if "/api/" in str(request.url):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        response.headers["Surrogate-Control"] = "no-store"
+    response.headers["Access-Control-Allow-Origin"] = "*"
     
     return response
+
+# Bulk Data Pool Endpoint (Reduces Vercel serverless latency from 10 calls to 1 single call)
+@app.get("/api/data-pool")
+def get_data_pool(request: Request):
+    user_id = None
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer simulated-jwt-for-"):
+        user_id = auth_header.replace("Bearer simulated-jwt-for-", "").strip()
+
+    with db_lock:
+        current_user = next((u for u in db_state.get("users", []) if u.get("id") == user_id), None)
+        return {
+            "me": current_user,
+            "users": db_state.get("users", []),
+            "applications": db_state.get("applications", []),
+            "documents": db_state.get("documents", []),
+            "tests": db_state.get("tests", []),
+            "assignedTests": db_state.get("assignedTests", []),
+            "emails": db_state.get("emails", []),
+            "notifications": db_state.get("notifications", []),
+            "activityLogs": db_state.get("activityLogs", []),
+            "settings": db_state.get("settings", {})
+        }
 
 # Health check endpoint
 @app.get("/api/health")
@@ -1712,49 +1737,55 @@ def ensure_default_test_assigned(employee_id: str, sync: bool = True):
         if not default_test_id or default_test_id == "none":
             return
             
-        # Check if the employee already has ANY default onboarding test assigned
+        tests_list = db_state.get("tests", [])
+        default_test = next((t for t in tests_list if t.get("id") == default_test_id), None)
+        if not default_test:
+            default_test = next((t for t in tests_list if t.get("id") == "test-system-safety"), None)
+        if not default_test and tests_list:
+            default_test = next((t for t in tests_list if t.get("isPublished", True)), tests_list[0])
+            
+        if not default_test:
+            return
+
+        # Check if the employee already has ANY assignment for this test
         assigned = db_state.get("assignedTests", [])
-        has_default = any(a.get("employeeId") == employee_id and a.get("isDefaultOnboardingTest") == True for a in assigned)
+        has_default = any(
+            a.get("employeeId") == employee_id and (
+                a.get("isDefaultOnboardingTest") == True or 
+                a.get("testId") == default_test["id"] or 
+                a.get("testId") == default_test_id
+            ) 
+            for a in assigned
+        )
         
         if not has_default:
-            tests_list = db_state.get("tests", [])
-            # Try to find the configured default test
-            default_test = next((t for t in tests_list if t.get("id") == default_test_id), None)
-            # Fallback 1: if not found, look for standard system safety test
-            if not default_test:
-                default_test = next((t for t in tests_list if t.get("id") == "test-system-safety"), None)
-            # Fallback 2: if still not found, look for any published test
-            if not default_test and tests_list:
-                default_test = next((t for t in tests_list if t.get("isPublished", True)), tests_list[0])
-                
-            if default_test:
-                new_assign = {
-                    "id": f"assign-{int(datetime.now().timestamp() * 1000)}-{str(random.randint(1000, 9999))}",
-                    "testId": default_test["id"],
-                    "testName": default_test["name"],
-                    "employeeId": employee_id,
-                    "status": "not_started",
-                    "score": None,
-                    "totalQuestions": len(default_test.get("questions", [])),
-                    "passingMarks": default_test.get("passingMarks", 60),
-                    "passed": None,
-                    "answers": {},
-                    "remainingTime": default_test.get("duration", 30) * 60,
-                    "startedAt": None,
-                    "completedAt": None,
-                    "assignedAt": datetime.utcnow().isoformat() + "Z",
-                    "isDefaultOnboardingTest": True
-                }
-                db_state["assignedTests"].append(new_assign)
-                
-                # Checklists text: "Test Assigned"
-                for item in db_state.get("checklists", []):
-                    if item.get("employeeId") == employee_id and item.get("text") == "Test Assigned":
-                        item["isCompleted"] = True
-                        item["updatedAt"] = datetime.utcnow().isoformat() + "Z"
-                        
-                if sync:
-                    save_database(["assignedTests", "checklists"])
+            new_assign = {
+                "id": f"assign-{int(datetime.now().timestamp() * 1000)}-{str(random.randint(1000, 9999))}",
+                "testId": default_test["id"],
+                "testName": default_test["name"],
+                "employeeId": employee_id,
+                "status": "not_started",
+                "score": None,
+                "totalQuestions": len(default_test.get("questions", [])),
+                "passingMarks": default_test.get("passingMarks", 60),
+                "passed": None,
+                "answers": {},
+                "remainingTime": default_test.get("duration", 30) * 60,
+                "startedAt": None,
+                "completedAt": None,
+                "assignedAt": datetime.utcnow().isoformat() + "Z",
+                "isDefaultOnboardingTest": True
+            }
+            db_state["assignedTests"].append(new_assign)
+            
+            # Checklists text: "Test Assigned"
+            for item in db_state.get("checklists", []):
+                if item.get("employeeId") == employee_id and item.get("text") == "Test Assigned":
+                    item["isCompleted"] = True
+                    item["updatedAt"] = datetime.utcnow().isoformat() + "Z"
+                    
+            if sync:
+                save_database(["assignedTests", "checklists"])
 
 # Settings Endpoints
 @app.get("/api/settings")

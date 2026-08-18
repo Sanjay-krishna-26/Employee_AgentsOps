@@ -102,9 +102,32 @@ export default function App() {
     const tokenAtStart = authToken;
 
     try {
-      const headers = { "Authorization": `Bearer ${authToken}` };
+      const headers = { 
+        "Authorization": `Bearer ${authToken}`,
+        "Cache-Control": "no-cache"
+      };
 
-      // Multi-gather
+      const resPool = await fetch("/api/data-pool", { headers, cache: "no-store" });
+      if (resPool.ok) {
+        const pool = await safeJson(resPool);
+        if (authToken !== tokenAtStart || !pool) return;
+
+        if (pool.me && pool.me.id) {
+          setCurrentUser(pool.me);
+        }
+        if (Array.isArray(pool.users)) setEmployees(pool.users);
+        if (Array.isArray(pool.applications)) setApplications(pool.applications);
+        if (Array.isArray(pool.documents)) setDocuments(pool.documents);
+        if (Array.isArray(pool.tests)) setTests(pool.tests);
+        if (Array.isArray(pool.assignedTests)) setAssignedTests(pool.assignedTests);
+        if (Array.isArray(pool.emails)) setEmails(pool.emails);
+        if (Array.isArray(pool.notifications)) setNotifications(pool.notifications);
+        if (Array.isArray(pool.activityLogs)) setActivityLogs(pool.activityLogs);
+        return;
+      }
+
+      // Fallback multi-gather with cache: "no-store" if /api/data-pool is unreachable
+      const fetchOpts = { headers, cache: "no-store" as const };
       const [
         resMe,
         resUsers,
@@ -114,19 +137,17 @@ export default function App() {
         resAssigned,
         resEmails,
         resNotifs,
-        resLogs,
-        resSettings
+        resLogs
       ] = await Promise.all([
-        fetch("/api/auth/me", { headers }),
-        fetch("/api/users", { headers }),
-        fetch("/api/applications", { headers }),
-        fetch("/api/documents", { headers }),
-        fetch("/api/tests", { headers }),
-        fetch("/api/assigned-tests", { headers }),
-        fetch("/api/emails", { headers }),
-        fetch("/api/notifications", { headers }),
-        fetch("/api/activity-logs", { headers }),
-        fetch("/api/settings", { headers })
+        fetch("/api/auth/me", fetchOpts),
+        fetch("/api/users", fetchOpts),
+        fetch("/api/applications", fetchOpts),
+        fetch("/api/documents", fetchOpts),
+        fetch("/api/tests", fetchOpts),
+        fetch("/api/assigned-tests", fetchOpts),
+        fetch("/api/emails", fetchOpts),
+        fetch("/api/notifications", fetchOpts),
+        fetch("/api/activity-logs", fetchOpts)
       ]);
 
       if (authToken !== tokenAtStart) return;
@@ -135,56 +156,35 @@ export default function App() {
       if (mePayload && mePayload.id) {
         setCurrentUser(mePayload);
       } else if (resMe.status === 401 || resMe.status === 403) {
-        let reason = "Your authentication session has expired. For your safety, please sign in again.";
-        if (resMe.status === 401) {
-          reason = "Session expired or invalid credential token (401 Unauthorized). Please sign in again.";
-        } else if (resMe.status === 403) {
-          reason = "Your account does not have authorization, or access was revoked (403 Forbidden). Please sign in again.";
-        }
-        handleLogout(reason);
+        handleLogout("Session expired. Please sign in again.");
         return;
       }
 
       const usersArr = await safeJson(resUsers);
-      if (authToken !== tokenAtStart) return;
       if (Array.isArray(usersArr)) setEmployees(usersArr);
 
       const appsArr = await safeJson(resApps);
-      if (authToken !== tokenAtStart) return;
       if (Array.isArray(appsArr)) setApplications(appsArr);
 
       const docsArr = await safeJson(resDocs);
-      if (authToken !== tokenAtStart) return;
       if (Array.isArray(docsArr)) setDocuments(docsArr);
 
       const testsArr = await safeJson(resTests);
-      if (authToken !== tokenAtStart) return;
       if (Array.isArray(testsArr)) setTests(testsArr);
 
       const assignedArr = await safeJson(resAssigned);
-      if (authToken !== tokenAtStart) return;
       if (Array.isArray(assignedArr)) setAssignedTests(assignedArr);
 
       const emailsArr = await safeJson(resEmails);
-      if (authToken !== tokenAtStart) return;
       if (Array.isArray(emailsArr)) setEmails(emailsArr);
 
       const notifsArr = await safeJson(resNotifs);
-      if (authToken !== tokenAtStart) return;
       if (Array.isArray(notifsArr)) setNotifications(notifsArr);
 
       const logsArr = await safeJson(resLogs);
-      if (authToken !== tokenAtStart) return;
       if (Array.isArray(logsArr)) setActivityLogs(logsArr);
-
-      const settingsPayload = await safeJson(resSettings);
-      if (authToken !== tokenAtStart) return;
-      if (settingsPayload && settingsPayload.defaultTestId) {
-        setDefaultTestId(settingsPayload.defaultTestId);
-      }
-
     } catch (e) {
-      console.error("Data syncing error:", e);
+      console.error("Failed to sync data pool:", e);
     }
   }
 
