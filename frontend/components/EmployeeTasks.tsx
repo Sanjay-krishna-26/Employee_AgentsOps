@@ -233,15 +233,21 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
                         </p>
 
                         {task.driveLink && (
-                          <div className="pt-1">
+                          <div className="p-3.5 bg-indigo-50/70 border border-indigo-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-2">
+                            <div className="space-y-0.5">
+                              <span className="font-bold text-slate-900 text-xs block">Task Google Drive Upload Folder</span>
+                              <p className="text-slate-500 text-[10px] leading-normal">
+                                Click the button to open the Google Drive folder, view guidelines, and upload your files & deliverables.
+                              </p>
+                            </div>
                             <a
                               href={task.driveLink}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg border border-indigo-200 transition shadow-sm"
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3.5 rounded-lg flex items-center justify-center gap-1.5 transition text-xs shadow-sm cursor-pointer whitespace-nowrap flex-shrink-0"
                             >
-                              <span>Open Reference Google Drive Folder</span>
-                              <ExternalLink className="h-3 w-3" />
+                              <span>Open Google Drive Folder</span>
+                              <ExternalLink className="h-3.5 w-3.5" />
                             </a>
                           </div>
                         )}
@@ -370,6 +376,28 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
                   <div className="p-3 bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 font-semibold rounded-lg flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 flex-shrink-0" />
                     <span>{submitSuccess}</span>
+                  </div>
+                )}
+
+                {activeSubmitTask.driveLink && (
+                  <div className="p-3.5 bg-indigo-50/80 border border-indigo-200 rounded-xl space-y-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <h4 className="font-extrabold text-slate-900 text-xs">Task Google Drive Upload Folder</h4>
+                        <p className="text-slate-500 text-[10px] mt-0.5">
+                          Please click the button to open the folder and upload your deliverables directly.
+                        </p>
+                      </div>
+                      <a
+                        href={activeSubmitTask.driveLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer whitespace-nowrap"
+                      >
+                        <span>Open Google Drive</span>
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </a>
+                    </div>
                   </div>
                 )}
 
