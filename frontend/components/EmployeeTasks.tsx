@@ -44,7 +44,6 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
 
   // Submission Form States
   const [submittedText, setSubmittedText] = useState("");
-  const [submittedDriveLink, setSubmittedDriveLink] = useState("");
   const [attachments, setAttachments] = useState<{ name: string; size: string; url: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -116,18 +115,18 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
     setSubmitError("");
     setSubmitSuccess("");
 
-    const finalFiles = submittedDriveLink.trim()
-      ? [{
-          name: submittedDriveLink.trim(),
-          url: (activeSubmitTask.driveLink || submittedDriveLink.trim()),
-          size: "Google Drive Item"
-        }]
-      : attachments;
-
-    if (!submittedText.trim() && finalFiles.length === 0) {
-      setSubmitError("Please provide solution notes or enter your uploaded Google Drive file/folder name.");
+    if (!submittedText.trim()) {
+      setSubmitError("Please provide your solution notes / implementation details.");
       return;
     }
+
+    const finalFiles = activeSubmitTask.driveLink
+      ? [{
+          name: "Uploaded Deliverables (Google Drive Folder)",
+          url: activeSubmitTask.driveLink,
+          size: "Google Drive Folder"
+        }]
+      : [];
 
     setSubmitting(true);
     const payload = {
@@ -148,7 +147,6 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
       if (res.ok) {
         setSubmitSuccess("Solution successfully submitted to Administration!");
         setSubmittedText("");
-        setSubmittedDriveLink("");
         setAttachments([]);
         setTimeout(() => {
           setActiveSubmitTask(null);
@@ -297,7 +295,6 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
                             <button
                               onClick={() => {
                                 setSubmittedText(sub?.submittedText || "");
-                                setSubmittedDriveLink(sub?.files?.[0]?.url || "");
                                 setAttachments([]);
                                 setActiveSubmitTask(task);
                                 setSubmitError("");
@@ -423,21 +420,6 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
                     onChange={(e) => setSubmittedText(e.target.value)}
                     className="w-full bg-white border border-slate-350 rounded p-2.5 text-slate-800 focus:outline-none focus:border-indigo-500 text-xs font-sans leading-relaxed"
                   />
-                </div>
-
-                {/* Uploaded Google Drive File / Folder Name Field */}
-                <div>
-                  <label className="text-slate-700 font-bold block mb-1">Uploaded Google Drive File / Folder Name</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Sanjay_Task_Submission.docx or Final_Deliverables_Folder"
-                    value={submittedDriveLink}
-                    onChange={(e) => setSubmittedDriveLink(e.target.value)}
-                    className="w-full bg-white border border-slate-300 rounded p-2.5 text-slate-800 focus:outline-none focus:border-indigo-500 text-xs font-mono"
-                  />
-                  <p className="text-[10px] text-slate-500 mt-1">
-                    Enter the exact file or folder name you uploaded inside the Task Google Drive Folder.
-                  </p>
                 </div>
 
                 <div className="flex gap-2.5 pt-2">
