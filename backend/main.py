@@ -2983,6 +2983,9 @@ def record_attendance_checkout(req: Dict[str, Any]):
     if not record:
         raise HTTPException(status_code=404, detail="Attendance check-in record not found for today.")
         
+    if record.get("status") == "rejected":
+        raise HTTPException(status_code=400, detail="Cannot record check-out: Attendance check-in request was rejected by Admin (Marked Absent).")
+        
     now_iso = datetime.utcnow().isoformat() + "Z"
     record["checkOutAt"] = now_iso
     

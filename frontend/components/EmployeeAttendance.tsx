@@ -344,11 +344,15 @@ export default function EmployeeAttendance({ currentUser, onRefreshAll }: Employ
                         {todayRecord.status === "approved"
                           ? "✔ Approved Present"
                           : todayRecord.status === "rejected"
-                          ? "✘ Check-in Rejected"
+                          ? "✘ Check-In Rejected (Marked Absent)"
                           : "⏳ Awaiting Approval"}
                       </span>
 
-                      {!todayRecord.checkOutAt ? (
+                      {todayRecord.status === "rejected" ? (
+                        <div className="mt-2 p-2.5 bg-rose-50 border border-rose-200 text-rose-700 font-bold text-xs rounded-lg text-center shadow-xs max-w-sm">
+                          Attendance request rejected by Admin — Marked Absent for Today.
+                        </div>
+                      ) : !todayRecord.checkOutAt ? (
                         <button
                           disabled={checkingOut}
                           onClick={handleCheckOut}
