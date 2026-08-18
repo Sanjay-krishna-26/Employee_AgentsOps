@@ -118,14 +118,14 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
 
     const finalFiles = submittedDriveLink.trim()
       ? [{
-          name: submittedDriveLink.trim().startsWith("http") ? "Google Drive Deliverable File" : submittedDriveLink.trim(),
-          url: submittedDriveLink.trim(),
-          size: "Drive File"
+          name: submittedDriveLink.trim(),
+          url: (activeSubmitTask.driveLink || submittedDriveLink.trim()),
+          size: "Google Drive Item"
         }]
       : attachments;
 
     if (!submittedText.trim() && finalFiles.length === 0) {
-      setSubmitError("Please provide solution notes or your uploaded Google Drive file link.");
+      setSubmitError("Please provide solution notes or enter your uploaded Google Drive file/folder name.");
       return;
     }
 
@@ -425,18 +425,18 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
                   />
                 </div>
 
-                {/* Uploaded Google Drive File Field */}
+                {/* Uploaded Google Drive File / Folder Name Field */}
                 <div>
-                  <label className="text-slate-700 font-bold block mb-1">Uploaded Deliverable File Link / File Name</label>
+                  <label className="text-slate-700 font-bold block mb-1">Uploaded Google Drive File / Folder Name</label>
                   <input
                     type="text"
-                    placeholder="Paste uploaded Google Drive file link or file name (e.g. https://drive.google.com/file/d/...)"
+                    placeholder="e.g. Sanjay_Task_Submission.docx or Final_Deliverables_Folder"
                     value={submittedDriveLink}
                     onChange={(e) => setSubmittedDriveLink(e.target.value)}
                     className="w-full bg-white border border-slate-300 rounded p-2.5 text-slate-800 focus:outline-none focus:border-indigo-500 text-xs font-mono"
                   />
                   <p className="text-[10px] text-slate-500 mt-1">
-                    Open the Task Google Drive Folder above, upload your deliverable file, and paste your file link or name here.
+                    Enter the exact file or folder name you uploaded inside the Task Google Drive Folder.
                   </p>
                 </div>
 
