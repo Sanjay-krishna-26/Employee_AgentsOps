@@ -560,7 +560,7 @@ export default function AdminTests({
               onClick={handleStartCreate}
               className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-md transition-all cursor-pointer"
             >
-              <Plus className="h-4 w-4" /> Create Assessment
+              <Plus className="h-4 w-4" /> Create Assignment
             </button>
           </div>
 
