@@ -55,7 +55,7 @@ export default function AdminDocuments({
     const emp = employees.find(e => e.id === employeeId);
     if (!emp) return;
 
-    const token = localStorage.getItem("agentops_jwt");
+    const token = sessionStorage.getItem("agentops_jwt") || localStorage.getItem("agentops_jwt");
     const headers: Record<string, string> = {
       "Content-Type": "application/json"
     };

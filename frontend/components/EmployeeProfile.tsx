@@ -76,7 +76,7 @@ export default function EmployeeProfile({
 
     setSaveLoading(true);
 
-    const token = localStorage.getItem("agentops_jwt");
+    const token = sessionStorage.getItem("agentops_jwt") || localStorage.getItem("agentops_jwt");
     const headers: Record<string, string> = {
       "Content-Type": "application/json"
     };
@@ -157,7 +157,7 @@ export default function EmployeeProfile({
       return;
     }
 
-    const token = localStorage.getItem("agentops_jwt");
+    const token = sessionStorage.getItem("agentops_jwt") || localStorage.getItem("agentops_jwt");
     const headers: Record<string, string> = {
       "Content-Type": "application/json"
     };
@@ -220,7 +220,7 @@ export default function EmployeeProfile({
     // Immediate optimistic state update
     setLocalSubmittedDocs(newSubmittedDocs);
 
-    const token = localStorage.getItem("agentops_jwt");
+    const token = sessionStorage.getItem("agentops_jwt") || localStorage.getItem("agentops_jwt");
     const headers: Record<string, string> = {
       "Content-Type": "application/json"
     };

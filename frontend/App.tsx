@@ -41,10 +41,10 @@ import {
 } from "./types";
 
 export default function App() {
-  // Authentication state - Persist active session token from localStorage to prevent auto-logout on refresh
-  const [authToken, setAuthToken] = useState<string | null>(() => localStorage.getItem("agentops_jwt"));
+  // Authentication state - Use sessionStorage so new windows/tabs always prompt for Login credentials first
+  const [authToken, setAuthToken] = useState<string | null>(() => sessionStorage.getItem("agentops_jwt"));
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [checkingAuth, setCheckingAuth] = useState<boolean>(() => !!localStorage.getItem("agentops_jwt"));
+  const [checkingAuth, setCheckingAuth] = useState<boolean>(() => !!sessionStorage.getItem("agentops_jwt"));
   const [authError, setAuthError] = useState<string | null>(null);
 
   // Secure Password Reset state parsed from email link redirection
@@ -327,7 +327,8 @@ export default function App() {
   }, [assignedTests, currentUser, tests]);
 
   function handleLoginSuccess(user: User, token: string) {
-    localStorage.setItem("agentops_jwt", token);
+    sessionStorage.setItem("agentops_jwt", token);
+    localStorage.removeItem("agentops_jwt");
     setAuthToken(token);
     setCurrentUser(user);
     setAuthError(null);
@@ -337,6 +338,7 @@ export default function App() {
   }
 
   function handleLogout(errorMessage?: string) {
+    sessionStorage.removeItem("agentops_jwt");
     localStorage.removeItem("agentops_jwt");
     localStorage.removeItem("agentops_active_tab");
     

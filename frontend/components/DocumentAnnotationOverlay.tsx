@@ -69,7 +69,7 @@ export default function DocumentAnnotationOverlay({
     let active = true;
     
     // Attempt to load administrator name
-    const token = localStorage.getItem("agentops_jwt");
+    const token = sessionStorage.getItem("agentops_jwt") || localStorage.getItem("agentops_jwt");
     if (token) {
       fetch("/api/auth/me", {
         headers: { "Authorization": `Bearer ${token}` }
