@@ -188,9 +188,10 @@ export default function EmployeeProfile({
   }
 
   const [localSubmittedDocs, setLocalSubmittedDocs] = useState<string[]>(() => application?.submittedDocs || []);
+  const isTogglingRef = React.useRef(false);
 
   useEffect(() => {
-    if (application?.submittedDocs) {
+    if (!isTogglingRef.current && application?.submittedDocs) {
       setLocalSubmittedDocs(application.submittedDocs);
     }
   }, [application?.submittedDocs]);
@@ -199,6 +200,7 @@ export default function EmployeeProfile({
   async function handleToggleDoc(docId: string, isChecked: boolean) {
     setErrorStatus("");
     setSuccessStatus("");
+    isTogglingRef.current = true;
 
     const currentSubmittedDocs = localSubmittedDocs;
     let newSubmittedDocs: string[];
@@ -226,13 +228,18 @@ export default function EmployeeProfile({
         body: JSON.stringify({ submittedDocs: newSubmittedDocs })
       });
 
-      if (!appRes.ok) {
-        throw new Error("Failed to save checklist state.");
+      if (appRes.ok) {
+        const data = await appRes.json();
+        if (Array.isArray(data.submittedDocs)) {
+          setLocalSubmittedDocs(data.submittedDocs);
+        }
       }
-
-      onRefreshAll();
     } catch (e: any) {
       console.error("Failed to update submitted docs:", e);
+    } finally {
+      setTimeout(() => {
+        isTogglingRef.current = false;
+      }, 1500);
     }
   }
 
