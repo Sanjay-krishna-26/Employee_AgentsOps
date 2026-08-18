@@ -163,7 +163,7 @@ export default function DashboardLayout({
       if (title.includes("message") || message.includes("message") || title.includes("broadcast") || message.includes("broadcast") || title.includes("hr message")) {
         destTab = "employee-messages";
       } else if (title.includes("assessment") || message.includes("assessment") || title.includes("exam") || message.includes("exam") || title.includes("test") || message.includes("test")) {
-        destTab = "employee-assessments";
+        destTab = "employee-tests";
       } else if (title.includes("document") || message.includes("document") || title.includes("doc") || message.includes("doc")) {
         destTab = "employee-documents";
       } else if (title.includes("task") || message.includes("task") || title.includes("coding") || message.includes("coding")) {
