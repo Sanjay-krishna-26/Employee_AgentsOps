@@ -19,8 +19,40 @@ interface ApplicationFormProps {
   currentUser: EmployeeUser;
   application: Application | null;
   onRefreshAll: () => Promise<void>;
-  onSelectTab: (tab: string) => void;
+  onSelectTab?: (tab: string) => void;
 }
+
+const TECHNICAL_SKILLS_OPTIONS = [
+  "C",
+  "C++",
+  "Java",
+  "Python",
+  "JavaScript",
+  "HTML",
+  "CSS",
+  "SQL",
+  "MySQL",
+  "MongoDB",
+  "React",
+  "Node.js",
+  "Angular",
+  "Git",
+  "GitHub",
+  "Linux",
+  "Docker",
+  "Kubernetes",
+  "AWS",
+  "Azure",
+  "REST API",
+  "Machine Learning",
+  "Data Structures",
+  "Algorithms",
+  "DBMS",
+  "Operating Systems",
+  "OOP",
+  "Selenium",
+  "Figma"
+];
 
 export default function ApplicationForm({
   currentUser,
@@ -489,35 +521,35 @@ export default function ApplicationForm({
               
                {!isAlreadySubmitted && (
                 <div className="flex gap-2">
-                  <input
-                    type="text"
+                  <select
                     value={techSkillInput}
-                    onChange={(e) => setTechSkillInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        const val = techSkillInput.trim();
-                        if (val && !technicalSkills.includes(val)) {
-                          setTechnicalSkills([...technicalSkills, val]);
-                        }
-                        setTechSkillInput("");
-                      }
-                    }}
-                    placeholder="e.g. React (Press Enter or Add Skills)"
-                    className="bg-white border border-slate-200 text-slate-900 rounded-xl p-2.5 flex-1 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const val = techSkillInput.trim();
+                    onChange={(e) => {
+                      const val = e.target.value;
                       if (val && !technicalSkills.includes(val)) {
                         setTechnicalSkills([...technicalSkills, val]);
                       }
                       setTechSkillInput("");
                     }}
+                    className="bg-white border border-slate-200 text-slate-900 rounded-xl p-2.5 flex-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer text-xs font-medium"
+                  >
+                    <option value="">-- Select Technical Skill --</option>
+                    {TECHNICAL_SKILLS_OPTIONS.map((skill) => (
+                      <option key={skill} value={skill} disabled={technicalSkills.includes(skill)}>
+                        {skill} {technicalSkills.includes(skill) ? "(Added)" : ""}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (techSkillInput && !technicalSkills.includes(techSkillInput)) {
+                        setTechnicalSkills([...technicalSkills, techSkillInput]);
+                      }
+                      setTechSkillInput("");
+                    }}
                     className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 rounded-xl transition cursor-pointer text-xs"
                   >
-                    Add Skills
+                    Add Skill
                   </button>
                 </div>
               )}
