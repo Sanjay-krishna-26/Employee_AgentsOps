@@ -107,6 +107,7 @@ export default function AdminEmployeeManagement({
   const [actionSuccess, setActionSuccess] = useState("");
 
   const filteredEmployees = employees.filter(emp => {
+    if (emp.role === UserRole.ADMIN) return false;
     const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           emp.mobile.includes(searchTerm);

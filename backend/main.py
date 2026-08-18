@@ -503,12 +503,30 @@ def deduplicate_database_state():
     save_database()
     print("[Python FastAPI] Database deduplication and Supabase sync complete.")
 
+def ensure_admin_account_exists():
+    users = db_state.get("users", [])
+    has_admin = any(u.get("role") == "admin" or u.get("id") == "admin-1" for u in users)
+    if not has_admin:
+        admin_user = {
+            "id": "admin-1",
+            "name": "G Venkat (HR Lead)",
+            "email": "agentopslabs@gmail.com",
+            "mobile": "+1 (555) 019-2834",
+            "role": "admin",
+            "status": "active",
+            "createdAt": "2026-06-12T09:19:46.377303Z"
+        }
+        db_state.setdefault("users", []).append(admin_user)
+        db_state.setdefault("passwords", {})["admin-1"] = "Gvenkat@123"
+        save_database(["users", "passwords"])
+
 def load_database(silent=True):
     # Load "users" to ensure database seeding or loading occurs if empty
     users = db_state.get("users", [])
     if not users:
         print("[Python FastAPI] Database is empty (no users). Seeding default data...")
         seed_database()
+    ensure_admin_account_exists()
 
 def _background_supabase_sync_worker(db_copy: dict, collections: set, failed_collections: set = None):
     """Background thread worker that syncs to Supabase without blocking the API response."""
@@ -641,7 +659,7 @@ def get_data_pool(request: Request):
         current_user = next((u for u in db_state.get("users", []) if u.get("id") == user_id), None)
         return {
             "me": current_user,
-            "users": db_state.get("users", []),
+            "users": [u for u in db_state.get("users", []) if u.get("role") != "admin" and u.get("role") != UserRole.ADMIN],
             "applications": db_state.get("applications", []),
             "documents": db_state.get("documents", []),
             "tests": db_state.get("tests", []),
@@ -1487,6 +1505,10 @@ def update_employee(user_id: str, req: Dict[str, Any]):
 # Delete user fully
 @app.delete("/api/users/{user_id}")
 def delete_employee(user_id: str):
+    target_user = next((u for u in db_state.get("users", []) if u.get("id") == user_id), None)
+    if target_user and (target_user.get("role") == "admin" or target_user.get("id") == "admin-1"):
+        raise HTTPException(status_code=400, detail="Administrator accounts cannot be deleted.")
+
     db_state["users"] = [u for u in db_state["users"] if u["id"] != user_id]
     db_state["applications"] = [a for a in db_state["applications"] if a.get("employeeId") != user_id]
     db_state["documents"] = [d for d in db_state["documents"] if d.get("employeeId") != user_id]
