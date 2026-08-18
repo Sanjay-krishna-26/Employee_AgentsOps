@@ -371,11 +371,10 @@ export default function ApplicationForm({
               <input
                 type="text"
                 required
-                disabled={isAlreadySubmitted}
+                disabled
+                readOnly
                 value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="e.g. John Doe"
-                className="w-full bg-white border border-slate-200 text-slate-900 rounded-xl p-3 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-500 cursor-not-allowed font-medium"
               />
             </div>
             <div>
@@ -384,20 +383,20 @@ export default function ApplicationForm({
                 type="email"
                 required
                 disabled
+                readOnly
                 value={email}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-450 text-slate-400 cursor-not-allowed"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-500 cursor-not-allowed font-medium"
               />
             </div>
             <div>
-              <label className="text-slate-500 font-semibold block mb-1">Mobile Contact Phone</label>
+              <label className="text-slate-500 font-semibold block mb-1">Mobile No.</label>
               <input
                 type="tel"
                 required
-                disabled={isAlreadySubmitted}
+                disabled
+                readOnly
                 value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                placeholder="e.g. +1 (555) 012-3456"
-                className="w-full bg-white border border-slate-200 text-slate-900 rounded-xl p-3 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-500 cursor-not-allowed font-medium"
               />
             </div>
             <div>
