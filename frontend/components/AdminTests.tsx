@@ -54,9 +54,9 @@ export default function AdminTests({
     setQuestions([
       {
         id: `q-${Date.now()}-1`,
-        text: "Sample Single Match Question?",
+        text: "",
         type: QuestionType.SINGLE_CHOICE,
-        options: ["Option A", "Option B", "Option C", "Option D"],
+        options: ["", "", "", ""],
         correctAnswers: [0],
         moduleName: "General"
       }
@@ -109,9 +109,9 @@ export default function AdminTests({
     const newQId = `q-${Date.now()}-${Math.floor(Math.random() * 100)}`;
     const newQ: Question = {
       id: newQId,
-      text: "New Option Question Details?",
+      text: "",
       type: QuestionType.SINGLE_CHOICE,
-      options: ["True", "False"],
+      options: ["", "", "", ""],
       correctAnswers: [0],
       moduleName: "General"
     };
@@ -281,13 +281,13 @@ export default function AdminTests({
                 }}
                 className="bg-slate-100 text-slate-700 font-black text-xs py-2 px-4 rounded-lg border border-slate-200 hover:bg-slate-200 cursor-pointer uppercase transition-all"
               >
-                Cancel Draft [X]
+                Cancel
               </button>
               <button
                 type="submit"
                 className="bg-[#0A2540] hover:bg-[#0c1a30] text-white font-black text-xs py-2 px-4 rounded-lg flex items-center gap-1.5 shadow-md cursor-pointer uppercase transition-all"
               >
-                <Save className="h-4 w-4 text-[#F1B814]" /> Save Standard Template
+                <Save className="h-4 w-4 text-[#F1B814]" /> Save Assignment
               </button>
             </div>
           </div>
@@ -446,7 +446,7 @@ export default function AdminTests({
                                   }}
                                   className="w-full bg-white border border-slate-300 rounded p-2.5 text-slate-800 focus:outline-none focus:ring-0 cursor-pointer"
                                 >
-                                  <option value="" disabled>Select</option>
+                                  <option value="">Select</option>
                                   <option value={QuestionType.SINGLE_CHOICE}>Single Choice MCQ</option>
                                   <option value={QuestionType.MULTIPLE_CHOICE}>Multiple Choices MCQ</option>
                                   <option value={QuestionType.TRUE_FALSE}>True / False Binary Option</option>
