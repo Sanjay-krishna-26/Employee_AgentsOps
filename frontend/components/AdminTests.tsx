@@ -428,6 +428,7 @@ export default function AdminTests({
                                 required
                                 value={activeQ.text}
                                 onChange={(e) => handleUpdateQuestionText(activeQ.id, e.target.value)}
+                                placeholder="e.g. What is the primary purpose of React Hooks?"
                                 rows={2}
                                 className="w-full bg-white border border-slate-300 rounded p-2.5 text-slate-800 focus:border-indigo-500 focus:outline-none font-sans"
                               />
@@ -437,10 +438,15 @@ export default function AdminTests({
                               <div className="flex-1">
                                 <label className="text-slate-700 font-bold block mb-1">Input Format Type</label>
                                 <select
-                                  value={activeQ.type}
-                                  onChange={(e) => handleUpdateQuestionType(activeQ.id, e.target.value as QuestionType)}
+                                  value={activeQ.type || ""}
+                                  onChange={(e) => {
+                                    if (e.target.value) {
+                                      handleUpdateQuestionType(activeQ.id, e.target.value as QuestionType);
+                                    }
+                                  }}
                                   className="w-full bg-white border border-slate-300 rounded p-2.5 text-slate-800 focus:outline-none focus:ring-0 cursor-pointer"
                                 >
+                                  <option value="" disabled>Select</option>
                                   <option value={QuestionType.SINGLE_CHOICE}>Single Choice MCQ</option>
                                   <option value={QuestionType.MULTIPLE_CHOICE}>Multiple Choices MCQ</option>
                                   <option value={QuestionType.TRUE_FALSE}>True / False Binary Option</option>
@@ -499,6 +505,7 @@ export default function AdminTests({
                                         value={opt}
                                         disabled={activeQ.type === QuestionType.TRUE_FALSE}
                                         onChange={(e) => handleUpdateOption(activeQ.id, oIdx, e.target.value)}
+                                        placeholder={`Option ${String.fromCharCode(65 + oIdx)} text (e.g. ${oIdx === 0 ? "State Management" : oIdx === 1 ? "Component Lifecycle" : `Choice ${oIdx + 1}`})`}
                                         className="flex-1 bg-white border border-slate-300 rounded p-2 text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-505"
                                       />
 
