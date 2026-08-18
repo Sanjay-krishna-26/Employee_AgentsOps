@@ -181,7 +181,7 @@ export default function ApplicationForm({
       }
 
       const status = application?.status || ApplicationStatus.NOT_STARTED;
-      const isDbLocked = status === ApplicationStatus.APPROVED;
+      const isDbLocked = status === ApplicationStatus.SUBMITTED || status === ApplicationStatus.APPROVED;
 
       if (isDbLocked) {
         setFullName(application?.fullName || currentUser.name || "");
@@ -348,7 +348,7 @@ export default function ApplicationForm({
     }
   }
 
-  const isAlreadySubmitted = formStatus === ApplicationStatus.APPROVED; 
+  const isAlreadySubmitted = formStatus === ApplicationStatus.SUBMITTED || formStatus === ApplicationStatus.APPROVED; 
   const displayStatusBanner = formStatus === ApplicationStatus.SUBMITTED || formStatus === ApplicationStatus.APPROVED;
 
   return (
@@ -363,26 +363,31 @@ export default function ApplicationForm({
       </div>
 
       {message && (
-        <div className="p-4 bg-emerald-50 border border-emerald-250 border-emerald-200 text-emerald-800 text-xs font-semibold rounded-xl flex items-center gap-2.5 shadow-sm">
+        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold rounded-xl flex items-center gap-2.5 shadow-sm">
           <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0" />
           <span>{message}</span>
         </div>
       )}
 
       {errorStatus && (
-        <div className="p-4 bg-rose-50 border border-rose-250 border-rose-200 text-rose-800 text-xs font-semibold rounded-xl flex items-center gap-2.5 shadow-sm">
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold rounded-xl flex items-center gap-2.5 shadow-sm">
           <AlertTriangle className="h-5 w-5 text-rose-600 flex-shrink-0 animate-pulse" />
           <span>{errorStatus}</span>
         </div>
       )}
 
       {displayStatusBanner && (
-        <div className="p-4 bg-indigo-50 border border-indigo-150 rounded-xl text-indigo-800 text-xs flex items-start gap-3">
-          <Lightbulb className="h-5 w-5 text-indigo-600 mt-0.5 flex-shrink-0" />
+        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs flex items-start gap-3 shadow-sm">
+          <CheckCircle className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
           <div className="space-y-1">
-            <h4 className="font-bold text-slate-900">Application Submitted</h4>
+            <h4 className="font-bold text-slate-900 flex items-center gap-2">
+              Application Submitted & Locked
+              <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Submitted
+              </span>
+            </h4>
             <p className="text-slate-600 leading-normal">
-              Your onboarding information was submitted for verification. If you need to make changes, you can edit your basic details or add/remove skillset tags below, then click <strong>Submit Application</strong> or <strong>Save Draft Profile</strong> to save your updates.
+              Your onboarding application has been successfully submitted. The form is now locked. Please proceed to complete your assigned Onboarding Assessment.
             </p>
           </div>
         </div>
