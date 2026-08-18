@@ -48,6 +48,7 @@ export default function AdminTasks({ employees, onRefreshAll }: AdminTasksProps)
   const [description, setDescription] = useState("");
   const [targetType, setTargetType] = useState<"all" | "single">("all");
   const [selectedEmpId, setSelectedEmpId] = useState("");
+  const [driveLink, setDriveLink] = useState("");
   const [attachments, setAttachments] = useState<{ name: string; size: string; url: string }[]>([]);
   
   // Feedback states
@@ -132,7 +133,8 @@ export default function AdminTasks({ employees, onRefreshAll }: AdminTasksProps)
       title: title.trim(),
       description: description.trim(),
       assignedTo: targetType === "all" ? "all" : selectedEmpId,
-      files: attachments
+      driveLink: driveLink.trim(),
+      files: driveLink.trim() ? [{ name: "Reference Google Drive Folder", url: driveLink.trim(), size: "Drive Link" }] : attachments
     };
 
     try {
@@ -146,6 +148,7 @@ export default function AdminTasks({ employees, onRefreshAll }: AdminTasksProps)
         setFormSuccess("Task successfully deployed and dispatched!");
         setTitle("");
         setDescription("");
+        setDriveLink("");
         setAttachments([]);
         setSelectedEmpId("");
         fetchTasksAndSubmissions();
@@ -353,48 +356,19 @@ export default function AdminTasks({ employees, onRefreshAll }: AdminTasksProps)
                 </div>
               )}
 
-              {/* Task attachments upload */}
+              {/* Reference Attachments: Google Drive Upload Folder Link */}
               <div>
-                <label className="text-slate-700 font-bold block mb-1">Reference Attachments (Optional)</label>
-                <div className="flex items-center justify-center w-full">
-                  <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-300 border-dashed rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100/70 transition-all">
-                    <div className="flex flex-col items-center justify-center pt-4 pb-4">
-                      <Plus className="w-6 h-6 text-slate-400 mb-1" />
-                      <p className="text-[10px] text-slate-500 font-bold">Click to upload PDFs, Images, CSVs, Docs...</p>
-                      <p className="text-[8px] text-slate-400 mt-0.5">Supports any file type</p>
-                    </div>
-                    <input
-                      type="file"
-                      multiple
-                      className="hidden"
-                      onChange={handleFileChange}
-                    />
-                  </label>
-                </div>
-
-                {attachments.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    <p className="font-bold text-slate-700">Uploaded Task Resources:</p>
-                    <div className="divide-y divide-slate-150 border border-slate-200 rounded-lg overflow-hidden bg-white">
-                      {attachments.map((file, idx) => (
-                        <div key={idx} className="p-2.5 flex items-center justify-between hover:bg-slate-50">
-                          <div className="flex items-center gap-2 truncate">
-                            <FileText className="h-4 w-4 text-indigo-550 flex-shrink-0" />
-                            <span className="font-semibold text-slate-800 truncate">{file.name}</span>
-                            <span className="text-[9px] text-slate-450 font-mono">({file.size})</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => removeAttachment(idx)}
-                            className="text-rose-500 hover:text-rose-700 p-1 rounded hover:bg-rose-50"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <label className="text-slate-700 font-bold block mb-1">Reference Attachments</label>
+                <input
+                  type="url"
+                  placeholder="Paste Google Drive upload folder link (e.g. https://drive.google.com/drive/folders/...)"
+                  value={driveLink}
+                  onChange={(e) => setDriveLink(e.target.value)}
+                  className="w-full bg-white border border-slate-300 rounded p-2.5 text-slate-800 focus:outline-none focus:border-indigo-500 text-xs font-mono"
+                />
+                <p className="text-[10px] text-slate-500 mt-1">
+                  Provide Google Drive folder URL for candidate reference templates and attachments.
+                </p>
               </div>
 
               <button

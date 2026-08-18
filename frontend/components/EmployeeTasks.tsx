@@ -11,7 +11,8 @@ import {
   Plus,
   Trash2,
   Check,
-  ChevronRight
+  ChevronRight,
+  ExternalLink
 } from "lucide-react";
 import { useTheme } from "./ThemeContext";
 import { Task, TaskSubmission, User } from "../types";
@@ -230,6 +231,20 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
                         <p className="text-[11px] text-slate-650 leading-relaxed font-sans line-clamp-2" title={task.description}>
                           {task.description}
                         </p>
+
+                        {task.driveLink && (
+                          <div className="pt-1">
+                            <a
+                              href={task.driveLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg border border-indigo-200 transition shadow-sm"
+                            >
+                              <span>Open Reference Google Drive Folder</span>
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          </div>
+                        )}
                         
                         <div className="flex flex-wrap items-center gap-4 text-[9px] text-slate-450 font-mono pt-1">
                           <span className="flex items-center gap-1">

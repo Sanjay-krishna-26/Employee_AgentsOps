@@ -186,6 +186,7 @@ export interface Task {
   title: string;
   description: string;
   assignedTo: string; // "all" or specific employee ID
+  driveLink?: string;
   files: TaskAttachment[];
   createdAt: string;
   status: string;

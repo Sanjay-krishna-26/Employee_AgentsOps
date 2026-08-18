@@ -2658,6 +2658,7 @@ def create_task(req: Dict[str, Any]):
         "title": title,
         "description": description,
         "assignedTo": assigned_to,
+        "driveLink": req.get("driveLink", ""),
         "files": files,
         "createdAt": datetime.utcnow().isoformat() + "Z",
         "status": "assigned"
