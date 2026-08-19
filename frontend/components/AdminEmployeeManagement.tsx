@@ -253,14 +253,17 @@ export default function AdminEmployeeManagement({
     }
   }
 
-  // Delete employee
+  // Delete employee (Instant 0ms latency)
   async function handleDeleteUser(empId: string) {
+    if (selectedEmp?.id === empId) {
+      setSelectedEmp(null);
+    }
+    setConfirmModal(null);
+    onRefreshAll();
+
     try {
-      const res = await fetch(`/api/users/${empId}`, { method: "DELETE" });
-      if (res.ok) {
-        setSelectedEmp(null);
-        onRefreshAll();
-      }
+      await fetch(`/api/users/${empId}`, { method: "DELETE" });
+      onRefreshAll();
     } catch (e) {
       console.error(e);
     }

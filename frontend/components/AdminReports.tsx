@@ -43,7 +43,7 @@ export default function AdminReports({
   // Statistics summaries
   const totalEmps = employees.length;
   const activeEmps = employees.filter(e => e.status === UserStatus.ACTIVE).length;
-  const docsUploaded = documents.length;
+  const docsUploaded = documents.length + applications.reduce((acc, a) => acc + (a.googleDriveLink ? 1 : 0) + (Array.isArray(a.submittedDocs) ? a.submittedDocs.length : 0), 0);
   const examsCompleted = assignedTests.filter(t => t.status === TestStatus.COMPLETED).length;
   const passedCount = assignedTests.filter(t => t.status === TestStatus.COMPLETED && t.passed).length;
 
@@ -109,16 +109,50 @@ export default function AdminReports({
         const filteredDocs = selectedEmployeeId
           ? documents.filter(d => d.employeeId === selectedEmployeeId)
           : documents;
-        return filteredDocs.map(d => {
+        
+        const allUploadedDocs: Array<{ col1: string; col2: string; col3: string; col4: string; col5: string }> = [];
+
+        // 1. Direct documents table items
+        filteredDocs.forEach(d => {
           const emp = employees.find(e => e.id === d.employeeId);
-          return {
-            col1: emp ? emp.name : "Anonymous Candidate",
-            col2: d.type.toUpperCase(),
-            col3: d.fileName,
-            col4: d.status.toUpperCase(),
-            col5: new Date(d.uploadedAt).toLocaleDateString()
-          };
-        }).filter(r => r.col1.toLowerCase().includes(searchTerm.toLowerCase()) || r.col2.toLowerCase().includes(searchTerm.toLowerCase()));
+          allUploadedDocs.push({
+            col1: emp ? emp.name : "Candidate",
+            col2: (d.type || "DOCUMENT").toUpperCase(),
+            col3: d.fileName || "Uploaded Attachment",
+            col4: (d.status || "APPROVED").toUpperCase(),
+            col5: d.uploadedAt ? new Date(d.uploadedAt).toLocaleDateString() : new Date().toLocaleDateString()
+          });
+        });
+
+        // 2. Application submitted Google Drive links & submitted docs
+        const filteredAppsDocs = selectedEmployeeId 
+          ? applications.filter(a => a.employeeId === selectedEmployeeId)
+          : applications;
+
+        filteredAppsDocs.forEach(app => {
+          if (app.googleDriveLink) {
+            allUploadedDocs.push({
+              col1: app.fullName || "Candidate",
+              col2: "GOOGLE DRIVE FOLDER",
+              col3: app.googleDriveLink,
+              col4: "SUBMITTED",
+              col5: app.submittedAt ? new Date(app.submittedAt).toLocaleDateString() : (app.updatedAt ? new Date(app.updatedAt).toLocaleDateString() : new Date().toLocaleDateString())
+            });
+          }
+          if (Array.isArray(app.submittedDocs) && app.submittedDocs.length > 0) {
+            app.submittedDocs.forEach(docKey => {
+              allUploadedDocs.push({
+                col1: app.fullName || "Candidate",
+                col2: docKey.toUpperCase(),
+                col3: `${docKey}_verified_document`,
+                col4: "VERIFIED",
+                col5: app.submittedAt ? new Date(app.submittedAt).toLocaleDateString() : (app.updatedAt ? new Date(app.updatedAt).toLocaleDateString() : new Date().toLocaleDateString())
+              });
+            });
+          }
+        });
+
+        return allUploadedDocs.filter(r => r.col1.toLowerCase().includes(searchTerm.toLowerCase()) || r.col2.toLowerCase().includes(searchTerm.toLowerCase()) || r.col3.toLowerCase().includes(searchTerm.toLowerCase()));
 
       default:
         return [];
