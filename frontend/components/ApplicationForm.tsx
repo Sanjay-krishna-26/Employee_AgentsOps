@@ -332,7 +332,7 @@ export default function ApplicationForm({
         setMessage(
           type === "draft" 
             ? "Your application draft has been saved successfully." 
-            : "Onboarding Application form submitted! You are now eligible to complete the assigned assessments."
+            : "Onboarding Application form submitted successfully!"
         );
         await onRefreshAll();
         if (type === "submitted") {
@@ -358,7 +358,7 @@ export default function ApplicationForm({
       <div className="border-b border-slate-200 pb-5">
         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Onboarding Application Form</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Complete your formal onboarding profile setup to authorize your access to assigned qualification tests.
+          Complete your formal onboarding profile setup.
         </p>
       </div>
 
@@ -387,7 +387,7 @@ export default function ApplicationForm({
               </span>
             </h4>
             <p className="text-slate-600 leading-normal">
-              Your onboarding application has been successfully submitted. The form is now locked. Please proceed to complete your assigned Onboarding Assessment.
+              Your onboarding application has been successfully submitted. The form is now locked.
             </p>
           </div>
         </div>

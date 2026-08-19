@@ -45,25 +45,9 @@ export default function EmployeeDashboard({
   const appStatus = application ? application.status : ApplicationStatus.NOT_STARTED;
   const isEligibleForTest = !!application && (appStatus === ApplicationStatus.SUBMITTED || appStatus === ApplicationStatus.APPROVED);
 
-  // Pop-up states for default test assignment notification
+  // Pop-up states disabled as per requirement
   const [showAssignedPopup, setShowAssignedPopup] = useState(false);
   const [popupTest, setPopupTest] = useState<AssignedTest | null>(null);
-
-  useEffect(() => {
-    if (isEligibleForTest && assignedTests.length > 0) {
-      // Find the first assigned test that is the DEFAULT test, is not started, and hasn't had its popup acknowledged yet
-      const pendingTest = assignedTests.find(
-        t => t.status === TestStatus.NOT_STARTED && t.isDefaultOnboardingTest === true
-      );
-      if (pendingTest) {
-        const hasShown = sessionStorage.getItem(`popup_shown_${pendingTest.id}`);
-        if (!hasShown) {
-          setPopupTest(pendingTest);
-          setShowAssignedPopup(true);
-        }
-      }
-    }
-  }, [assignedTests, isEligibleForTest]);
 
   const handleClosePopup = () => {
     if (popupTest) {
@@ -126,7 +110,7 @@ export default function EmployeeDashboard({
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">Onboarding Desk & Workspace</h1>
           <p className="text-xs text-slate-500 mt-1">
-            Complete your onboarding stages safely. Submit the entry details form to unlock qualification credentials.
+            Welcome to your employee portal workspace.
           </p>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-lg text-xs text-slate-600 font-medium">
