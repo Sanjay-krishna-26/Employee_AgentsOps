@@ -1193,6 +1193,9 @@ def auth_login(req: LoginRequest):
         db_state["passwords"][matched_user["id"]] = password
         save_database("passwords")
         
+    if matched_user.get("role") == "employee":
+        ensure_default_test_assigned(matched_user["id"], sync=True)
+
     log_activity(matched_user["id"], matched_user["name"], "User Sign-In", "Successful authentication via credentials.")
     
     return {
@@ -1949,11 +1952,9 @@ def list_assigned_tests():
 
 @app.get("/api/assigned-tests/{employee_id}")
 def get_employee_assigned_tests(employee_id: str):
-    # Mandatory onboarding test assignment for employees who submitted their application form
-    app_item = next((a for a in db_state.get("applications", []) if a.get("employeeId") == employee_id), None)
-    if app_item and app_item.get("status") in ["submitted", "approved"]:
-        ensure_default_test_assigned(employee_id, sync=True)
-    return [a for a in db_state.get("assignedTests", []) if a["employeeId"] == employee_id]
+    # Mandatory onboarding test assignment for all employee accounts upon login/viewing
+    ensure_default_test_assigned(employee_id, sync=True)
+    return [a for a in db_state.get("assignedTests", []) if a.get("employeeId") == employee_id]
 
 @app.post("/api/assigned-tests/assign", status_code=201)
 def assign_test_to_employees(req: AssignTestRequest):

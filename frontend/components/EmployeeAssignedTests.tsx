@@ -121,18 +121,13 @@ export default function EmployeeAssignedTests({
                     </div>
                   ) : (
                     <button
-                      disabled={!isEligible}
                       onClick={() => {
                         if (document.documentElement.requestFullscreen) {
                           document.documentElement.requestFullscreen().catch(() => {});
                         }
                         onStartTest(record);
                       }}
-                      className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold transition shadow-sm ${
-                        isEligible 
-                          ? "bg-slate-900 text-white hover:bg-slate-800 cursor-pointer" 
-                          : "bg-slate-100 text-slate-450 text-slate-405 cursor-not-allowed border border-slate-200"
-                      }`}
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold transition shadow-sm bg-slate-900 text-white hover:bg-slate-800 cursor-pointer"
                     >
                       <Play className="h-3 w-3 fill-current" />
                       {isInProgress ? "Resume Active Test" : "Start Qualification Exam"}
