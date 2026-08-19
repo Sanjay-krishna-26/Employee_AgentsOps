@@ -1835,9 +1835,6 @@ def ensure_default_test_assigned(employee_id: str, sync: bool = True):
         settings = db_state.get("settings", {})
         default_test_id = settings.get("defaultTestId", "test-system-safety")
         
-        if not default_test_id or default_test_id == "none":
-            return
-            
         tests_list = db_state.get("tests", [])
         default_test = next((t for t in tests_list if t.get("id") == default_test_id), None)
         if not default_test:
@@ -1846,9 +1843,47 @@ def ensure_default_test_assigned(employee_id: str, sync: bool = True):
             default_test = next((t for t in tests_list if t.get("isPublished", True)), tests_list[0])
             
         if not default_test:
-            return
+            # Seed default system assessment standard if none exists
+            default_test = {
+                "id": "test-system-safety",
+                "name": "General Technical & Operational Competency Exam",
+                "description": "Comprehensive evaluation covering core operational procedures, security standards, and technical workflow fundamentals.",
+                "duration": 30,
+                "passingMarks": 60,
+                "isPublished": True,
+                "questions": [
+                    {
+                        "id": "q1",
+                        "text": "What is the primary operational procedure for reporting system access anomalies?",
+                        "options": ["Notify HR & Log Security Ticket", "Ignore and retry later", "Share credentials with team", "Delete system logs"],
+                        "correctAnswer": 0,
+                        "marks": 25
+                    },
+                    {
+                        "id": "q2",
+                        "text": "Which authentication protocol ensures secure session isolation across browser tabs?",
+                        "options": ["SessionStorage JWT Token", "Plaintext Cookies", "Global URL Query String", "LocalStorage Permanent Key"],
+                        "correctAnswer": 0,
+                        "marks": 25
+                    },
+                    {
+                        "id": "q3",
+                        "text": "When submitting task deliverables, where should deliverables be uploaded?",
+                        "options": ["Designated Task Google Drive Folder", "Public Social Media", "Personal Email Inbox", "Unsecured Local Drive"],
+                        "correctAnswer": 0,
+                        "marks": 25
+                    },
+                    {
+                        "id": "q4",
+                        "text": "What is the minimum passing score threshold for onboarding qualification assessments?",
+                        "options": ["60%", "40%", "20%", "10%"],
+                        "correctAnswer": 0,
+                        "marks": 25
+                    }
+                ]
+            }
+            db_state.setdefault("tests", []).append(default_test)
 
-        # Check if the employee already has ANY assignment for this test
         assigned = db_state.get("assignedTests", [])
         has_default = any(
             a.get("employeeId") == employee_id and (
@@ -1877,16 +1912,15 @@ def ensure_default_test_assigned(employee_id: str, sync: bool = True):
                 "assignedAt": datetime.utcnow().isoformat() + "Z",
                 "isDefaultOnboardingTest": True
             }
-            db_state["assignedTests"].append(new_assign)
+            db_state.setdefault("assignedTests", []).append(new_assign)
             
-            # Checklists text: "Test Assigned"
             for item in db_state.get("checklists", []):
                 if item.get("employeeId") == employee_id and item.get("text") == "Test Assigned":
                     item["isCompleted"] = True
                     item["updatedAt"] = datetime.utcnow().isoformat() + "Z"
                     
             if sync:
-                save_database(["assignedTests", "checklists"])
+                save_database(["assignedTests", "checklists", "tests"])
 
 # Settings Endpoints
 @app.get("/api/settings")
@@ -1915,8 +1949,11 @@ def list_assigned_tests():
 
 @app.get("/api/assigned-tests/{employee_id}")
 def get_employee_assigned_tests(employee_id: str):
-    # No longer dynamically assign default tests retroactively to old employees
-    return [a for a in db_state["assignedTests"] if a["employeeId"] == employee_id]
+    # Mandatory onboarding test assignment for employees who submitted their application form
+    app_item = next((a for a in db_state.get("applications", []) if a.get("employeeId") == employee_id), None)
+    if app_item and app_item.get("status") in ["submitted", "approved"]:
+        ensure_default_test_assigned(employee_id, sync=True)
+    return [a for a in db_state.get("assignedTests", []) if a["employeeId"] == employee_id]
 
 @app.post("/api/assigned-tests/assign", status_code=201)
 def assign_test_to_employees(req: AssignTestRequest):
