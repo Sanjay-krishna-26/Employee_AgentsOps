@@ -148,12 +148,9 @@ export default function EmployeeTasks({ currentUser, onRefreshAll }: EmployeeTas
         setSubmitSuccess("Solution successfully submitted to Administration!");
         setSubmittedText("");
         setAttachments([]);
-        setTimeout(() => {
-          setActiveSubmitTask(null);
-          setSubmitSuccess("");
-          fetchTasksAndSubmissions();
-          onRefreshAll();
-        }, 1500);
+        setActiveSubmitTask(null);
+        fetchTasksAndSubmissions();
+        onRefreshAll();
       } else {
         const err = await res.json();
         setSubmitError(err.detail || "Submission transaction failed.");

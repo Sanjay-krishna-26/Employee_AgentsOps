@@ -298,12 +298,11 @@ export default function App() {
   }, [currentUser, activeTab]);
 
 
-  // Handle loading other auxiliary pools once authenticated
+  // Fast background data pool synchronization
   useEffect(() => {
     if (currentUser && authToken) {
       refreshDataPool();
-      // Establish background poll rate
-      const interval = setInterval(refreshDataPool, 8000); // 8 seconds fetch sync rate
+      const interval = setInterval(refreshDataPool, 4000); // 4 seconds fast sync rate
       return () => clearInterval(interval);
     }
   }, [currentUser, authToken, refreshTrigger]);

@@ -334,7 +334,7 @@ export default function ApplicationForm({
             ? "Your application draft has been saved successfully." 
             : "Onboarding Application form submitted successfully!"
         );
-        await onRefreshAll();
+        onRefreshAll().catch(() => {});
         if (type === "submitted") {
           onSelectTab("employee-dashboard");
         }

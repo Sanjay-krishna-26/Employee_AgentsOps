@@ -124,10 +124,8 @@ export default function EmployeeAttendance({ currentUser, onRefreshAll }: Employ
           return [newRecord, ...filtered];
         });
         setCheckInSuccess("Check-in approval request successfully dispatched to Admin!");
-        setTimeout(() => {
-          fetchEmployeeRecords();
-          onRefreshAll();
-        }, 1500);
+        fetchEmployeeRecords();
+        onRefreshAll();
       } else {
         const err = await res.json();
         setCheckInError(err.detail || "Check-in failed.");
@@ -158,10 +156,8 @@ export default function EmployeeAttendance({ currentUser, onRefreshAll }: Employ
         const updatedRecord = await res.json();
         setAttendance(prev => prev.map(r => r.date === todayStr ? updatedRecord : r));
         setCheckInSuccess("Check-out timestamp recorded successfully!");
-        setTimeout(() => {
-          fetchEmployeeRecords();
-          onRefreshAll();
-        }, 1500);
+        fetchEmployeeRecords();
+        onRefreshAll();
       } else {
         const err = await res.json();
         setCheckInError(err.detail || "Check-out failed.");
@@ -213,11 +209,8 @@ export default function EmployeeAttendance({ currentUser, onRefreshAll }: Employ
         setLeaveEndDate("");
         setLeaveReason("");
         setLeaveType("instant");
-        // Delayed refresh for eventual consistency
-        setTimeout(() => {
-          fetchEmployeeRecords();
-          onRefreshAll();
-        }, 1500);
+        fetchEmployeeRecords();
+        onRefreshAll();
       } else {
         const err = await res.json();
         setLeaveError(err.detail || "Failed to submit leave request.");
