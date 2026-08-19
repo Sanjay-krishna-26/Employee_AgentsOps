@@ -437,7 +437,7 @@ load_lock = threading.Lock()
 last_synced_db = {}
 
 def deduplicate_database_state():
-    """Identify and clean up duplicate employee records from db_state and sync changes."""
+    """Identify and clean up duplicate employee records and ensure zero duplicate entries across collections."""
     global db_state
     users = db_state.get("users", [])
     if not users:
@@ -465,43 +465,84 @@ def deduplicate_database_state():
             seen_emails[email] = u.get("id")
             unique_users.append(u)
             
-    if not deleted_user_ids:
-        return
+    if deleted_user_ids:
+        print(f"[Python FastAPI] Found duplicate users in database. Cleaning up {len(deleted_user_ids)} duplicates...")
+        db_state["users"] = unique_users
         
-    print(f"[Python FastAPI] Found duplicate users in database. Cleaning up {len(deleted_user_ids)} duplicates...")
-    
-    db_state["users"] = unique_users
-    
-    # Passwords
-    passwords = db_state.get("passwords", {})
-    clean_passwords = {}
-    for uid, pwd in passwords.items():
-        if uid not in deleted_user_ids:
-            clean_passwords[uid] = pwd
-    db_state["passwords"] = clean_passwords
-    
-    # Helper to filter array collections
-    def filter_coll(col_key):
-        items = db_state.get(col_key, [])
-        db_state[col_key] = [item for item in items if item.get("employeeId") not in deleted_user_ids]
+        passwords = db_state.get("passwords", {})
+        clean_passwords = {}
+        for uid, pwd in passwords.items():
+            if uid not in deleted_user_ids:
+                clean_passwords[uid] = pwd
+        db_state["passwords"] = clean_passwords
         
-    filter_coll("applications")
-    filter_coll("documents")
-    filter_coll("checklists")
-    filter_coll("assignedTests")
-    filter_coll("notifications")
-    filter_coll("messages")
-    filter_coll("taskSubmissions")
-    filter_coll("attendance")
-    filter_coll("leaves")
-    
-    # Filter activityLogs
-    activity_logs = db_state.get("activityLogs", [])
-    db_state["activityLogs"] = [log for log in activity_logs if log.get("employeeId") not in deleted_user_ids]
-    
-    # Sync the clean state back to disk and Supabase
-    save_database()
-    print("[Python FastAPI] Database deduplication and Supabase sync complete.")
+        def filter_coll(col_key):
+            items = db_state.get(col_key, [])
+            db_state[col_key] = [item for item in items if item.get("employeeId") not in deleted_user_ids]
+            
+        filter_coll("applications")
+        filter_coll("documents")
+        filter_coll("checklists")
+        filter_coll("assignedTests")
+        filter_coll("notifications")
+        filter_coll("messages")
+        filter_coll("taskSubmissions")
+        filter_coll("attendance")
+        filter_coll("leaves")
+        
+        activity_logs = db_state.get("activityLogs", [])
+        db_state["activityLogs"] = [log for log in activity_logs if log.get("employeeId") not in deleted_user_ids]
+
+    # Deduplicate applications by employeeId (keep latest merged profile)
+    if "applications" in db_state:
+        seen_apps = {}
+        unique_apps = []
+        for app_item in db_state["applications"]:
+            emp_id = app_item.get("employeeId")
+            if emp_id and emp_id in seen_apps:
+                orig = seen_apps[emp_id]
+                for k, v in app_item.items():
+                    if v:
+                        orig[k] = v
+            elif emp_id:
+                seen_apps[emp_id] = app_item
+                unique_apps.append(app_item)
+            else:
+                unique_apps.append(app_item)
+        db_state["applications"] = unique_apps
+
+    # Deduplicate assignedTests by employeeId + testId
+    if "assignedTests" in db_state:
+        seen_assigned = set()
+        unique_assigned = []
+        for at in db_state["assignedTests"]:
+            key = f"{at.get('employeeId')}_{at.get('testId')}"
+            if key not in seen_assigned:
+                seen_assigned.add(key)
+                unique_assigned.append(at)
+        db_state["assignedTests"] = unique_assigned
+
+    # Deduplicate attendance by employeeId + date
+    if "attendance" in db_state:
+        seen_att = set()
+        unique_att = []
+        for att_item in db_state["attendance"]:
+            key = f"{att_item.get('employeeId')}_{att_item.get('date')}"
+            if key not in seen_att:
+                seen_att.add(key)
+                unique_att.append(att_item)
+        db_state["attendance"] = unique_att
+
+    # Deduplicate taskSubmissions by employeeId + taskId
+    if "taskSubmissions" in db_state:
+        seen_subs = set()
+        unique_subs = []
+        for sub_item in db_state["taskSubmissions"]:
+            key = f"{sub_item.get('employeeId')}_{sub_item.get('taskId')}"
+            if key not in seen_subs:
+                seen_subs.add(key)
+                unique_subs.append(sub_item)
+        db_state["taskSubmissions"] = unique_subs
 
 def ensure_admin_account_exists():
     users = db_state.get("users", [])
@@ -527,6 +568,7 @@ def load_database(silent=True):
         print("[Python FastAPI] Database is empty (no users). Seeding default data...")
         seed_database()
     ensure_admin_account_exists()
+    deduplicate_database_state()
 
 def _background_supabase_sync_worker(db_copy: dict, collections: set, failed_collections: set = None):
     """Background thread worker that syncs to Supabase without blocking the API response."""
